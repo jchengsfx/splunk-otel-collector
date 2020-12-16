@@ -1,0 +1,11 @@
+receivers:
+  sfxsmartagent:
+
+exporters:
+  logging:
+
+service:
+  pipelines:
+    metrics:
+      receivers: [sfxsmartagent]
+      exporters: [logging]

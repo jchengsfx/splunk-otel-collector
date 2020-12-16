@@ -1,0 +1,40 @@
+receivers:
+  sfxsmartagent:
+  sfxsmartagent/redis:
+    type: collectd/redis
+    host: localhost
+    port: 6379
+    intervalSeconds: 10
+  sfxsmartagent/kafka:
+    type: collectd/kafka
+    host: localhost
+    port: 7199
+    intervalSeconds: 10
+  sfxsmartagent/uptime:
+    type: collectd/uptime
+    intervalSeconds: 30
+  sfxsmartagent/procstat:
+    type: telegraf/procstat
+    intervalSeconds: 20
+  sfxsmartagent/cpu:
+    type: cpu
+    intervalSeconds: 5
+    reportPerCPU: false
+
+processors:
+  exampleprocessor:
+
+exporters:
+  exampleexporter:
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - sfxsmartagent/redis
+        - sfxsmartagent/kafka
+        - sfxsmartagent/uptime
+        - sfxsmartagent/procstat
+        - sfxsmartagent/cpu
+      processors: [exampleprocessor]
+      exporters: [exampleexporter]

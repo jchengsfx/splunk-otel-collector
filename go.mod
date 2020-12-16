@@ -33,6 +33,7 @@ require (
 	github.com/ory/go-acc v0.2.6
 	github.com/pavius/impi v0.0.3
 	github.com/securego/gosec/v2 v2.5.0
+	github.com/signalfx/splunk-otel-collector/internal/receiver/sfxsmartagentreceiver v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.6.1
 	go.opentelemetry.io/collector v0.15.0
 	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211
@@ -48,4 +49,16 @@ replace (
 	github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.0.0-00010101000000-000000000000 => github.com/open-telemetry/opentelemetry-collector-contrib/internal/splunk v0.15.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver v0.0.0-00010101000000-000000000000 => github.com/open-telemetry/opentelemetry-collector-contrib/receiver/k8sclusterreceiver v0.15.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver v0.0.0-00010101000000-000000000000 => github.com/open-telemetry/opentelemetry-collector-contrib/receiver/redisreceiver v0.15.0
+)
+
+replace ( // sfxsmartagentreciever
+	code.cloudfoundry.org/go-loggregator => github.com/signalfx/go-loggregator v1.0.1-0.20200205155641-5ba5ca92118d // required for sfxsmartagentreceiver
+	github.com/dancannon/gorethink => gopkg.in/gorethink/gorethink.v4 v4.0.0 // required for sfxsmartagentreciever
+	github.com/influxdata/telegraf => github.com/signalfx/telegraf v0.10.2-0.20201211214327-200738592ced // required for sfxsmartagentreceiver
+	github.com/prometheus/prometheus => github.com/prometheus/prometheus v1.8.2-0.20201105135750-00f16d1ac3a4 // required for collector prometheusreceiver
+	github.com/signalfx/signalfx-agent => ../signalfx-agent // required for sfxsmartagentreceiver
+	github.com/signalfx/signalfx-agent/pkg/apm => ../signalfx-agent/pkg/apm // required for sfxsmartagentreceiver
+	github.com/signalfx/splunk-otel-collector/internal/receiver/sfxsmartagentreceiver v0.0.0-00010101000000-000000000000 => ./internal/receiver/sfxsmartagentreceiver
+	github.com/soheilhy/cmux => ../signalfx-agent/thirdparty/cmux // required for sfxsmartagentreceiver to drop google.golang.org/grpc/examples/helloworld/helloworld test dep
+	google.golang.org/grpc => google.golang.org/grpc v1.29.1 // required for sfxsmartagentreceiver's go.etcd.io/etcd dep
 )
