@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/signalfx/signalfx-agent/pkg/core/common/constants"
@@ -35,6 +37,7 @@ import (
 	"github.com/signalfx/signalfx-agent/pkg/monitors/subproc"
 	"github.com/signalfx/signalfx-agent/pkg/monitors/telegraf/monitors/procstat"
 	"github.com/signalfx/signalfx-agent/pkg/monitors/types"
+	"github.com/signalfx/signalfx-agent/pkg/utils"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/consumer"
 	"go.uber.org/zap"
@@ -45,7 +48,9 @@ type sfxSmartAgentReceiver struct {
 	sync.Mutex
 	logger       *zap.Logger
 	config       *Config
-	NextConsumer consumer.MetricsConsumer
+	monitor      *interface{}
+	output       *Output
+	nextConsumer consumer.MetricsConsumer
 	server       *http.Server
 
 	startOnce sync.Once
@@ -57,12 +62,13 @@ var _ component.MetricsReceiver = (*sfxSmartAgentReceiver)(nil)
 func NewReceiver(
 	logger *zap.Logger,
 	config Config,
+	nextConsumer consumer.MetricsConsumer,
 ) *sfxSmartAgentReceiver {
 	r := &sfxSmartAgentReceiver{
 		logger: logger,
 		config: &config,
+		nextConsumer: nextConsumer,
 	}
-
 	return r
 }
 
@@ -70,24 +76,40 @@ func (r *sfxSmartAgentReceiver) Start(_ context.Context, host component.Host) er
 	r.Lock()
 	defer r.Unlock()
 
-	if val := os.Getenv("SFX_RUN_MONITORS"); val == "" {
-		return nil
-	}
-
 	agentMeta := &meta.AgentMeta{
 		InternalStatusHost: "0.0.0.",
 		InternalStatusPort: 12345,
 	}
 
+	// These are required for collectd and sfxcollectd monitor types
 	manager := monitors.NewMonitorManager(agentMeta)
-	collectdManager := collectdManager(manager)
+	collectdManager(manager)
 
-	err := redisMonitor()                // sfxcollectd
-	err = kafkaMonitor(collectdManager)  // collectd/GenericJMX
-	err = uptimeMonitor(collectdManager) // collectd native
-	err = telegrafProcstatMonitor()      // telegraf
-	err = cpuMonitor()                   // native
-	return err
+	monitorConfig := r.config.sfxMonitorConfig
+	monitorConfigCore := monitorConfig.(config.MonitorCustomConfig).MonitorConfigCore()
+	monitorType := monitorConfigCore.Type
+	monitorName := strings.Replace(r.config.Name(), "/", "", -1)
+	monitorConfigCore.MonitorID = types.MonitorID(monitorName)
+	monitorFactory := monitors.MonitorFactories[monitorType]
+	monitor := monitorFactory()
+	r.monitor = &monitor
+
+	output := &Output{nextConsumer: r.nextConsumer}
+	r.output = output
+
+	// Taken from signalfx-agent activemonitor.  Should be exported in that lib in future.
+	outputValue := utils.FindFieldWithEmbeddedStructs(monitor, "Output",
+		reflect.TypeOf((*types.Output)(nil)).Elem())
+	if !outputValue.IsValid() {
+		outputValue = utils.FindFieldWithEmbeddedStructs(monitor, "Output",
+			reflect.TypeOf((*types.FilteringOutput)(nil)).Elem())
+		if !outputValue.IsValid() {
+			return fmt.Errorf("invalid monitor instance: %#v", monitor)
+		}
+	}
+	outputValue.Set(reflect.ValueOf(output))
+
+	return config.CallConfigure(monitor, monitorConfig)
 }
 
 func (r *sfxSmartAgentReceiver) Shutdown(context.Context) error {

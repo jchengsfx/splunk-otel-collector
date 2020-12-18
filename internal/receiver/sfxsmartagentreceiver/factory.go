@@ -32,6 +32,7 @@ func NewFactory() component.ReceiverFactory {
 	return receiverhelper.NewFactory(
 		typeStr,
 		CreateDefaultConfig,
+		receiverhelper.WithCustomUnmarshaler(mergeConfigs),
 		receiverhelper.WithMetrics(createMetricsReceiver),
 	)
 }
@@ -43,10 +44,6 @@ func CreateDefaultConfig() configmodels.Receiver {
 			NameVal: typeStr,
 		},
 	}
-}
-
-func (rCfg *Config) validate() error {
-	return nil
 }
 
 func createMetricsReceiver(
@@ -65,12 +62,10 @@ func createMetricsReceiver(
 	receiverLock.Lock()
 	r := receivers[rCfg]
 	if r == nil {
-		r = NewReceiver(params.Logger, *rCfg)
+		r = NewReceiver(params.Logger, *rCfg, consumer)
 		receivers[rCfg] = r
 	}
 	receiverLock.Unlock()
-
-	r.NextConsumer = consumer
 
 	return r, nil
 }

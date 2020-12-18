@@ -25,5 +25,5 @@ func TestCreateDefaultConfig(t *testing.T) {
 	factory := NewFactory()
 	cfg := factory.CreateDefaultConfig()
 	assert.NotNil(t, cfg, "failed to create default config")
-	assert.Error(t, configcheck.ValidateConfig(cfg))
+	assert.NoError(t, configcheck.ValidateConfig(cfg))
 }

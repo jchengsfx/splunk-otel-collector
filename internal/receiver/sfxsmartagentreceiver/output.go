@@ -1,7 +1,9 @@
 package sfxsmartagentreceiver
 
 import (
+	"context"
 	"fmt"
+	"go.opentelemetry.io/collector/consumer"
 
 	"github.com/signalfx/golib/v3/datapoint"
 	"github.com/signalfx/golib/v3/event"
@@ -10,7 +12,9 @@ import (
 	"github.com/signalfx/signalfx-agent/pkg/monitors/types"
 )
 
-type Output struct{}
+type Output struct{
+	nextConsumer consumer.MetricsConsumer
+}
 
 var _ types.FilteringOutput = (*Output)(nil)
 
@@ -38,11 +42,10 @@ func (output *Output) Copy() types.Output {
 	return output
 }
 
-func (output *Output) SendDatapoints(datapoint ...*datapoint.Datapoint) {
-	fmt.Printf("SendDatapoints: %v datapoints.\n", len(datapoint))
-	for _, i := range datapoint {
-		fmt.Printf("SendDatapoint: %#v\n", i)
-	}
+func (output *Output) SendDatapoints(datapoints ...*datapoint.Datapoint) {
+	metrics, numDropped := datapointsToMetrics(datapoints)
+	output.nextConsumer.ConsumeMetrics(context.Background(), metrics)
+	fmt.Printf("metrics: %#v, numDropped: %v\n", metrics, numDropped)
 }
 
 func (output *Output) SendEvent(event *event.Event) {

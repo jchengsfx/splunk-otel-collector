@@ -45,8 +45,6 @@ code.cloudfoundry.org/go-diodes v0.0.0-20180905200951-72629b5276e3/go.mod h1:Jzi
 code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f h1:UrKzEwTgeiff9vxdrfdqxibzpWjxLnuXDI5m6z3GJAk=
 code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f/go.mod h1:sk5LnIjB/nIEU7yP5sDQExVm62wu0pBh3yrElngUisI=
 code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a/go.mod h1:tkZo8GtzBjySJ7USvxm4E36lNQw1D3xM6oKHGqdaAJ4=
-code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 h1:mrZQaZmuDIPhSp6b96b+CRKC2uH44ifa5cjDV2epKis=
-code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78/go.mod h1:tkZo8GtzBjySJ7USvxm4E36lNQw1D3xM6oKHGqdaAJ4=
 collectd.org v0.3.0 h1:iNBHGw1VvPJxH2B6RiFWFZ+vsjo1lCdRszBeOuwGi00=
 collectd.org v0.3.0/go.mod h1:A/8DzQBkF6abtvrT2j/AU/4tiBgJWYyh0y/oB/4MlWE=
 collectd.org v0.5.0/go.mod h1:A/8DzQBkF6abtvrT2j/AU/4tiBgJWYyh0y/oB/4MlWE=

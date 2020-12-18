@@ -18,6 +18,13 @@ import (
 	"path"
 	"testing"
 
+	"github.com/signalfx/signalfx-agent/pkg/core/config"
+	"github.com/signalfx/signalfx-agent/pkg/monitors/collectd/genericjmx"
+	"github.com/signalfx/signalfx-agent/pkg/monitors/collectd/kafka"
+	"github.com/signalfx/signalfx-agent/pkg/monitors/collectd/memcached"
+	"github.com/signalfx/signalfx-agent/pkg/monitors/collectd/redis"
+	"github.com/signalfx/signalfx-agent/pkg/monitors/haproxy"
+	"github.com/signalfx/signalfx-agent/pkg/monitors/telegraf/monitors/ntpq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -35,6 +42,90 @@ func TestLoadConfig(t *testing.T) {
 		t, path.Join(".", "testdata", "config.yaml"), factories,
 	)
 
-	require.Error(t, err)
-	require.Nil(t, cfg)
+	require.NoError(t, err)
+	require.NotNil(t, cfg)
+
+	assert.Equal(t, len(cfg.Receivers), 5)
+
+	redisCfg := cfg.Receivers["sfxsmartagent/redis"].(*Config)
+	require.Equal(t, &Config{
+		ReceiverSettings: configmodels.ReceiverSettings{
+			TypeVal: typeStr,
+			NameVal: typeStr + "/redis",
+		},
+		sfxMonitorConfig: &redis.Config{
+			MonitorConfig: config.MonitorConfig{
+				Type:            "collectd/redis",
+				IntervalSeconds: 234,
+			},
+			Host: "localhost",
+			Port: 6379,
+		},
+	}, redisCfg)
+
+	kafkaCfg := cfg.Receivers["sfxsmartagent/kafka"].(*Config)
+	require.Equal(t, &Config{
+		ReceiverSettings: configmodels.ReceiverSettings{
+			TypeVal: typeStr,
+			NameVal: typeStr + "/kafka",
+		},
+		sfxMonitorConfig: &kafka.Config{
+			Config: genericjmx.Config{
+				MonitorConfig: config.MonitorConfig{
+					Type:            "collectd/kafka",
+					IntervalSeconds: 345,
+				},
+				Host: "localhost",
+				Port: 7199,
+			},
+		},
+	}, kafkaCfg)
+
+	tr := true
+	procstatCfg := cfg.Receivers["sfxsmartagent/ntpq"].(*Config)
+	require.Equal(t, &Config{
+		ReceiverSettings: configmodels.ReceiverSettings{
+			TypeVal: typeStr,
+			NameVal: typeStr + "/ntpq",
+		},
+		sfxMonitorConfig: &ntpq.Config{
+			MonitorConfig: config.MonitorConfig{
+				Type:            "telegraf/ntpq",
+				IntervalSeconds: 567,
+			},
+			DNSLookup: &tr,
+		},
+	}, procstatCfg)
+
+	memcachedCfg := cfg.Receivers["sfxsmartagent/memcached"].(*Config)
+	require.Equal(t, &Config{
+		ReceiverSettings: configmodels.ReceiverSettings{
+			TypeVal: typeStr,
+			NameVal: typeStr + "/memcached",
+		},
+		sfxMonitorConfig: &memcached.Config{
+			MonitorConfig: config.MonitorConfig{
+				Type:            "collectd/memcached",
+				IntervalSeconds: 456,
+			},
+			Host: "localhost",
+			Port: 5309,
+		},
+	}, memcachedCfg)
+
+	haproxyCfg := cfg.Receivers["sfxsmartagent/haproxy"].(*Config)
+	require.Equal(t, &Config{
+		ReceiverSettings: configmodels.ReceiverSettings{
+			TypeVal: typeStr,
+			NameVal: typeStr + "/haproxy",
+		},
+		sfxMonitorConfig: &haproxy.Config{
+			MonitorConfig: config.MonitorConfig{
+				Type:            "haproxy",
+				IntervalSeconds: 123,
+			},
+			Username: "SomeUser",
+			Password: "secret",
+		},
+	}, haproxyCfg)
 }

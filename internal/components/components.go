@@ -39,6 +39,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/simpleprometheusreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/splunkhecreceiver"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/statsdreceiver"
+	"github.com/signalfx/splunk-otel-collector/internal/receiver/sfxsmartagentreceiver"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenterror"
 	"go.opentelemetry.io/collector/exporter/fileexporter"
@@ -61,8 +62,6 @@ import (
 	"go.opentelemetry.io/collector/receiver/otlpreceiver"
 	"go.opentelemetry.io/collector/receiver/prometheusreceiver"
 	"go.opentelemetry.io/collector/receiver/zipkinreceiver"
-
-	"github.com/signalfx/splunk-otel-collector/internal/receiver/sfxsmartagentreceiver"
 )
 
 func Get() (component.Factories, error) {
