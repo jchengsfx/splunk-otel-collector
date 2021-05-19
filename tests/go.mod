@@ -5,10 +5,10 @@ go 1.16
 require (
 	github.com/docker/docker v20.10.6+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver v0.25.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/receiver/jmxreceiver v0.27.0
 	github.com/stretchr/testify v1.7.0
 	github.com/testcontainers/testcontainers-go v0.10.0
-	go.opentelemetry.io/collector v0.25.0
+	go.opentelemetry.io/collector v0.27.0
 	go.uber.org/zap v1.16.0
 	gopkg.in/yaml.v2 v2.4.0
 )
